@@ -1,0 +1,30 @@
+{
+  "name": "automatic-octo-winner",
+  "version": "1.1.0",
+  "description": "This is a genarator for gulpfile and package.json",
+  "license": "MIT License",
+  "keywords": "gulp",
+  "devDependencies": {
+    "browser-sync": "*",
+    "csslint-stylish": "0.0.6",
+    "del": "^2.2.2",
+    "es6-promise": "*",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "*",
+    "gulp-concat": "*",
+    "gulp-csscomb": "*",
+    "gulp-csslint": "*",
+    "gulp-html": "^0.4.5",
+    "gulp-if": "^2.0.2",
+    "gulp-jshint": "^2.0.4",
+    "gulp-merge-media-queries": "*",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-plumber": "*",
+    "gulp-uglify": "^2.1.2",
+    "gulp-useref": "^3.1.2",
+    "http-proxy-middleware": "*",
+    "jshint": "^2.9.4",
+    "jshint-stylish": "^2.2.1",
+    "wiredep": "^4.0.0"
+  }
+}

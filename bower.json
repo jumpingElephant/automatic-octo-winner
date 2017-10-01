@@ -1,0 +1,19 @@
+{
+  "name": "automatic-octo-winner",
+  "version": "0.0.1-SNAPSHOT",
+  "homepage": "https://github.com/jumpingElephant/automatic-octo-winner",
+  "author": "jumpingElephant",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "moment": "^2.17.1",
+    "font-awesome": "fontawesome#^4.7.0",
+    "juicy-ace-editor": "^2.0.4"
+  }
+}
