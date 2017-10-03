@@ -1,0 +1,133 @@
+<template id="shadowRoot">
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css">
+    <style type="text/css">
+    .invisible {
+        visibility: hidden;
+    }
+    
+    .inactive {
+        display: none;
+    }
+    
+    #root .fa-exclamation-circle {
+        color: #dc3545;
+    }
+    </style>
+    <div id="root">
+        <i class="fa fa-exclamation-circle fa-3x fa-fw"></i>
+        <div class="hint">Kein Fehler</div>
+    </div>
+</template>
+
+<script type="text/javascript">
+(function(window, document, undefined) {
+
+    // Refers to the "importer", which is index.html
+    var thatDoc = document;
+
+    // Refers to the "importee", which is pulse-spinner.html
+    var thisDoc = (document._currentScript || document.currentScript).ownerDocument;
+
+    // Gets content from <template>
+    var template = thisDoc.querySelector('template#shadowRoot').content;
+
+    class ErrorHint extends HTMLElement {
+
+        constructor() {
+            super();
+        }
+
+        connectedCallback() {
+            var shadowRoot = this.attachShadow({
+                mode: 'closed'
+            });
+
+            this.checkAttributeVisible();
+
+            var clone = thatDoc.importNode(template, true);
+            shadowRoot.appendChild(clone);
+
+            this.root = shadowRoot.querySelector('#root');
+
+            if (this.visible === 'false') {
+                this.root.classList.add('invisible');
+            }
+
+            if (this.active === 'false') {
+                this.root.classList.add('inactive');
+            }
+            this.updateText(this.text);
+        }
+
+        get active() {
+            return this.getAttribute('active');
+        }
+
+        set active(option) {
+            if (option) {
+                this.setAttribute('active', 'true');
+            } else {
+                this.setAttribute('active', 'false');
+            }
+        }
+
+        get text() {
+            return this.getAttribute('text');
+        }
+
+        set text(option) {
+            this.setAttribute('text', option);
+        }
+
+        get visible() {
+            return this.getAttribute('visible');
+        }
+
+        set visible(option) {
+            if (option) {
+                this.setAttribute('visible', 'true');
+            } else {
+                this.setAttribute('visible', 'false');
+            }
+        }
+
+        attributeChangedCallback(attrName, oldVal, newVal) {
+            switch (attrName) {
+                case 'visible':
+                    if (newVal === 'false') {
+                        this.classList.add('invisible');
+                    } else {
+                        this.classList.remove('invisible');
+                    }
+                    break;
+                case 'active':
+                    if (newVal === 'false') {
+                        this.classList.add('inactive');
+                    } else {
+                        this.classList.add('inactive');
+                    }
+                    break;
+                case 'text':
+                    this.updateText(newVal);
+                    break;
+            }
+        }
+
+        checkAttributeVisible() {
+            if (this.visible !== 'false') {
+                this.visible = 'true';
+            }
+        }
+
+        updateText(text) {
+            var hintDiv = this.root.querySelector('.hint');
+            var text = thisDoc.createTextNode(text);
+            hintDiv.innerText = text.textContent;
+        }
+
+    }
+
+    window.customElements.define('error-hint', ErrorHint);
+
+}(window, document));
+</script>

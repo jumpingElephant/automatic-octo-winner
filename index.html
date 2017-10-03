@@ -9,21 +9,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="shortcut icon" type="image/ico" href="favicon.ico">
-    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" type="text/css" href="src/imports/pulse-spinner.html">
+    <link rel="import" type="text/css" href="src/imports/error-hint.html">
+    <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
     <!-- build:css css/styles.css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" type="text/css" href="src/css/main.css" />
     <!-- endbuild -->
 </head>
 
 <body>
+    <!-- Image and text -->
+    <nav class="navbar navbar-light bg-faded">
+        <h2 class="navbar-brand mb-0">Hallo, Alex!</h2>
+    </nav>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <div class="container">
+            <h1 id="title">Spritverbrauch</h1>
+        </div>
+    </div>
+
+
+    <div class="container">
+
+        <div class="card text-center">
+            <div class="card-header">
+                <ul class="nav nav-pills card-header-pills">
+                    <li class="nav-item action">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#entryModal" data-mode="create">Neuer Eintrag</button>
+                    </li>
+                </ul>
+            </div>
+            <div id="table-cntr" class="card-block loading">
+
+                <pulse-spinner></pulse-spinner>
+                <error-hint active="false" text="Verbindungsfehler"></error-hint>
+
+            </div>
+        </div>
+    </div>
+
+
     <!-- Load scripts -->
     <!-- build:js scripts/vendor.js -->
     <!-- bower:js -->
-    <script src="bower_components/moment/moment.js"></script>
     <!-- endbower -->
-    <script src="bower_components/moment/locale/de.js"></script>
     <script type="text/javascript" src="src/js/app.js"></script>
     <!-- endbuild -->
 </body>

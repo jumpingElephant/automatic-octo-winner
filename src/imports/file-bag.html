@@ -1,0 +1,51 @@
+<!-- <script src="../ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script> -->
+
+<template id="shadowRoot">
+    <strong>Shadow dom super powers for Alex!</strong>
+</template>
+
+<script>
+(function(window, document, undefined) {
+
+    // Refers to the "importer", which is index.html
+    var thatDoc = document;
+
+    // Refers to the "importee", which is juicy-ace-editor.html
+    var thisDoc = (document._currentScript || document.currentScript).ownerDocument;
+
+    // Gets content from <template>
+    var template = thisDoc.querySelector('template#shadowRoot').content;
+
+    class FileBag extends HTMLElement {
+
+        constructor() {
+            super();
+        }
+
+        connectedCallback() {
+
+            var shadowRoot = this.attachShadow({
+                mode: 'open'
+            });
+
+            var clone = thatDoc.importNode(template, true);
+            this.container = clone.querySelector('#shadowRoot');
+            shadowRoot.appendChild(clone);
+        }
+
+        // Set the "open" property
+        set open(option) {
+            this.setAttribute("open", option);
+        }
+
+        // Get the "open" property
+        get open() {
+            return this.hasAttribute("open");
+        }
+
+    }
+
+    window.customElements.define('file-bag', FileBag);
+
+}(window, document));
+</script>

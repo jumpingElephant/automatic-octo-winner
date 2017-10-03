@@ -1,0 +1,99 @@
+<!--
+
+Note: You can also define a constructor in the class, but you have to call the super() method just before adding any other piece of code.
+
+There are lifecycle hooks that custom elements can define during their existence. These hooks are:
+
+    constructor(): Here, you can attach event listeners and initialize state.
+
+    connectedCallback(): Called whenever the custom element is inserted into the DOM.
+
+    disconnectedCallback(): Called whenever the custom element is removed from the DOM.
+
+    attributeChangedCallback(attrName, oldVal, newVal): Called whenever an attribute is added, removed or updated. Only attributes listed in the observedAttributes property are affected.
+
+    adoptedCallback(): Called whenever the custom element has been moved into a new document.
+
+-->
+
+<template id="shadowRoot">
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css">
+    <style type="text/css">
+    .invisible {
+        visibility: hidden;
+    }
+    </style>
+    <div>
+        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+    </div>
+</template>
+
+<script type="text/javascript">
+(function(window, document, undefined) {
+
+    // Refers to the "importer", which is index.html
+    var thatDoc = document;
+
+    // Refers to the "importee", which is pulse-spinner.html
+    var thisDoc = (document._currentScript || document.currentScript).ownerDocument;
+
+    // Gets content from <template>
+    var template = thisDoc.querySelector('template#shadowRoot').content;
+
+    class Spinner extends HTMLElement {
+
+        constructor() {
+            super();
+        }
+
+        connectedCallback() {
+            var shadowRoot = this.attachShadow({
+                mode: 'closed'
+            });
+
+            this.checkAttributeVisible();
+
+            var clone = thisDoc.importNode(template, true);
+            shadowRoot.appendChild(clone);
+
+            if (this.visible === 'false') {
+                this.classList.add('invisible');
+            }
+        }
+
+        set visible(option) {
+            if (option) {
+                this.setAttribute('visible', 'true');
+            } else {
+                this.setAttribute('visible', 'false');
+            }
+        }
+
+        get visible() {
+            return this.getAttribute('visible');
+        }
+
+        attributeChangedCallback(attrName, oldVal, newVal) {
+            switch (attrName) {
+                case 'visible':
+                    if (visible === 'false') {
+                        this.classList.add('invisible');
+                    } else {
+                        this.classList.remove('invisible');
+                    }
+                    break;
+            }
+        }
+
+        checkAttributeVisible() {
+            if (this.visible !== 'false') {
+                this.visible = 'true';
+            }
+        }
+
+    }
+
+    window.customElements.define('pulse-spinner', Spinner);
+
+}(window, document));
+</script>
