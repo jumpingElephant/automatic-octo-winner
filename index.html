@@ -11,6 +11,7 @@
     <link rel="shortcut icon" type="image/ico" href="favicon.ico">
     <link rel="import" type="text/css" href="src/imports/pulse-spinner.html">
     <link rel="import" type="text/css" href="src/imports/error-hint.html">
+    <link rel="import" type="text/css" href="src/imports/pagination.html">
     <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
     <!-- build:css css/styles.css -->
@@ -33,7 +34,6 @@
         </div>
     </div>
 
-
     <div class="container">
 
         <div class="card text-center">
@@ -49,10 +49,11 @@
                 <pulse-spinner></pulse-spinner>
                 <error-hint active="false" text="Verbindungsfehler"></error-hint>
 
+                <rsat-pagination totalCount="100" rpp="20" currentPage="5" theme="#007bff" id="paginationElement"></rsat-pagination>
+
             </div>
         </div>
     </div>
-
 
     <!-- Load scripts -->
     <!-- build:js scripts/vendor.js -->

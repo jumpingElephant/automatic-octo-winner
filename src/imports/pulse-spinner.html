@@ -73,10 +73,12 @@ There are lifecycle hooks that custom elements can define during their existence
             return this.getAttribute('visible');
         }
 
+        static get observedAttributes() { return ['visible'] };
+        
         attributeChangedCallback(attrName, oldVal, newVal) {
             switch (attrName) {
                 case 'visible':
-                    if (visible === 'false') {
+                    if (this.getAttribute('visible') === 'false') {
                         this.classList.add('invisible');
                     } else {
                         this.classList.remove('invisible');
