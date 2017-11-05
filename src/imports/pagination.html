@@ -16,7 +16,7 @@
 
     Start using it!
     <rsat-pagination totalCount="1000"
-                    rpp="10"
+                    recordsPerPage="10"
                     currentPage="1"
                     theme="#3f51b5"
                     id="paginationEle">
@@ -30,7 +30,7 @@
     Options
     totalCount (only Numbers):
         defines the total count of records
-    rpp (only Numbers):
+    recordsPerPage (only Numbers):
         defines records per page i.e. how many records per page to be displayed
     currentPage (only Numbers):
         defines which is the current page being displayed
@@ -43,7 +43,7 @@
 
 <template id="popup-template">
     <style>
-    .pagenodes {
+    .node {
         float: left;
         padding: 10px;
         float: left;
@@ -60,178 +60,110 @@
         cursor: pointer;
     }
 
-    .pagenodes:disabled,
-    .pagenodesbutton[disabled] {
-        /* background: #3f51b5; */
+    .page-number-node:disabled {
+        background: #007bff;
         color: #fff;
         cursor: not-allowed;
-    }
-
-    .dotnode {
-        float: left;
-        padding: 10px;
-        float: left;
-        padding: 10px;
     }
     </style>
     <h3></h3>
 </template>
 
 <script>
-var currentScript = document.currentScript;
-class rsatPagination extends HTMLElement {
+(function(window, document, undefined) {
 
-    static get observedAttributes() { return ['totalcount', 'rpp', 'currentpage', 'theme'] };
+    // Refers to the "importer", which is index.html
+    const importerDocument = document;
 
-    get totalCount() {
-        return this.getAttribute('totalCount')
-    }
-    set totalCount(val) {
-        if (val != null) {
-            this.setAttribute('totalCount', val);
-        }
-    }
-    get rpp() {
-        return this.getAttribute('rpp')
-    }
-    set rpp(val) {
-        if (val != null) {
-            this.setAttribute('rpp', val);
-        }
-    }
-    get currentPage() {
-        return this.getAttribute('currentPage')
-    }
-    set currentPage(val) {
-        if (val != null) {
-            this.setAttribute('currentPage', val);
-        }
-    }
-    get theme() {
-        return this.getAttribute('theme')
-    }
-    set theme(val) {
-        if (val != null) {
-            this.setAttribute('theme', val);
-        }
-    }
+    // Refers to the "importee", which is pulse-spinner.html
+    const thisDocument = (document._currentScript || document.currentScript).ownerDocument;
 
-    attributeChangedCallback(attr, oldvalue, newValue) {
-        if (attr == "currentpage") {
-            if (+newValue > +this.totalPages || +newValue <= 0) {
-                this.currentPage = 1;
+    class Pagination extends HTMLElement {
+
+        static get observedAttributes() { return ['totalcount', 'recordsPerPage', 'currentpage', 'theme'] };
+
+        constructor() {
+            super();
+            this.initShadowDom();
+        }
+
+        initShadowDom() {
+            const template = thisDocument.querySelector("#popup-template");
+            const instance = template.content.cloneNode(true);
+            this.shadowDOM = this.attachShadow({ mode: 'open' });
+            this.shadowDOM.appendChild(instance);
+        }
+
+        attributeChangedCallback(attr, oldvalue, newValue) {
+            if (attr == "currentpage") {
+                if (+newValue > +this.totalPages || +newValue <= 0) {
+                    this.currentPage = 1;
+                }
+            }
+            this.setUpUI();
+        }
+
+        setUpUI() {
+            this.totalPages = Math.ceil(this.totalCount / this.recordsPerPage);
+            this.currentPageInt = +this.currentPage;
+
+            var pageHtml = "<h3> this has " + this.totalPages + "pages and current page is  " + this.currentPage + " </h3>";
+
+            var pageHeader = document.createElement("div");
+            pageHeader.classList = "pageHeader";
+
+            var pageNoNode = this.createPreviousNode(Math.max(1, this.currentPageInt - 1));
+            pageHeader.appendChild(pageNoNode);
+
+            for (var i = 1; i <= this.totalPages; i++) {
+                var pageNoNode = this.createPageNumberNode(i);
+                pageHeader.appendChild(pageNoNode);
+            }
+
+            var pageNoNode = this.createNextNode(Math.min(this.totalPages, this.currentPageInt + 1));
+            pageHeader.appendChild(pageNoNode);
+
+            var paginationElement = this.shadowDOM.querySelector('h3');
+            if (paginationElement) {
+                paginationElement.innerHTML = '';
+                paginationElement.append(pageHeader);
             }
         }
-        this.setUpUI();
-    }
 
-    constructor() {
-        super();
-        this.initShadowDom();
-    }
+        createPageNumberNode(pageNumber) {
+            var pageNumberNode = this.createNode(pageNumber, pageNumber);
+            pageNumberNode.classList += " page-number-node";
+            return pageNumberNode;
+        }
 
-    initShadowDom() {
-        const mainDoc = currentScript.ownerDocument;
-        let shadowRoot = this.attachShadow({ mode: 'open' });
-        const t = mainDoc.querySelector("#popup-template");
-        const instance = t.content.cloneNode(true);
-        shadowRoot.appendChild(instance);
-        this.shadowDOM = shadowRoot;
-    }
+        createPreviousNode(pageNumber) {
+            var node = this.createNode(pageNumber, "&laquo;");
+            return node;
+        }
 
-    addPageNumbers(pn) {
-        if (pn > 0 && pn <= this.totalPages && this.pageNumbers.indexOf(pn) < 0) {
-            this.pageNumbers.push(pn);
+        createNextNode(pageNumber) {
+            var node = this.createNode(pageNumber, "&raquo;");
+            return node;
         }
-    }
 
-    setUpUI() {
-        this.totalPages = Math.ceil(this.totalCount / this.rpp);
-        this.currentPageInt = +this.currentPage;
-        this.pageNumbers = [];
-        this.b1 = [];
-        this.b2 = [];
-        this.b3 = [];
-        this.addPageNumbers(1);
-        this.addPageNumbers(2);
-        this.addPageNumbers(this.currentPageInt - 1);
-        this.addPageNumbers(this.currentPageInt);
-        this.addPageNumbers(this.currentPageInt + 1);
-        this.addPageNumbers(this.totalPages - 1);
-        this.addPageNumbers(this.totalPages);
-        for (var i = 0; i < this.pageNumbers.length; i++) {
-            if (i < 2) {
-                this.b1.push(this.pageNumbers[i]);
-            }
-            if (i >= 2 && i < this.pageNumbers.length - 2) {
-                this.b2.push(this.pageNumbers[i]);
-            }
-            if (i >= this.pageNumbers.length - 2) {
-                this.b3.push(this.pageNumbers[i]);
-            }
-        }
-        this.dot1 = true;
-        this.dot2 = true;
-        if ((this.b1[this.b1.length - 1] + 1) == this.b2[0]) {
-            this.dot1 = false;
-        }
-        if (this.b2.length == 0) {
-            this.dot2 = false;
-        }
-        if ((this.b2[this.b2.length - 1] + 1) == this.b3[0]) {
-            this.dot2 = false;
-        }
-        this.draw();
-    }
+        createNode(pageNumber, label) {
+            var node = document.createElement('button');
 
-    draw() {
-        var pageHtml = "<h3> this has " + this.totalPages + "pages and current page is  " + this.currentPage + " </h3>";
-        var pageHeader = document.createElement("div");
-        pageHeader.classList = "pageHeader";
-        for (var i = 0; i < this.b1.length; i++) {
-            var pageNoNode = this.addPageNumberNode(this.b1[i]);
-            pageHeader.appendChild(pageNoNode);
-        }
-        if (this.dot1) {
-            var pageNoNode = this.addPageDotNode('...');
-            pageHeader.appendChild(pageNoNode);
-        }
-        for (var i = 0; i < this.b2.length; i++) {
-            var pageNoNode = this.addPageNumberNode(this.b2[i]);
-            pageHeader.appendChild(pageNoNode);
-        }
-        if (this.dot2) {
-            var pageNoNode = this.addPageDotNode('...');
-            pageHeader.appendChild(pageNoNode);
-        }
-        for (var i = 0; i < this.b3.length; i++) {
-            var pageNoNode = this.addPageNumberNode(this.b3[i]);
-            pageHeader.appendChild(pageNoNode);
-        }
-        var paginationElement = this.shadowDOM.querySelector('h3');
-        if (paginationElement) {
-            paginationElement.innerHTML = '';
-            paginationElement.append(pageHeader);
-        }
-        //this.shadowDOM.innerHTML = pageHtml;
-        //this.shadowDOM.append(pageHeader);
-    }
+            node.innerHTML = label;
+            node.setAttribute('data-number', pageNumber);
 
-    addPageNumberNode(pn) {
-        var pageNumberNode = document.createElement('button');
-        pageNumberNode.innerHTML = pn;
-        pageNumberNode.setAttribute('data-number', pn);
-        if (pn == this.currentPage) {
-            pageNumberNode.disabled = true;
-            if (this.theme) {
-                pageNumberNode.style.backgroundColor = this.theme;
+            if (pageNumber == this.currentPageInt) {
+                node.disabled = true;
             } else {
-                pageNumberNode.style.backgroundColor = '#3f51b5';
+                node.disabled = false;
             }
-        } else {
-            pageNumberNode.disabled = false;
+
+            node.classList = "node";
+            node.addEventListener('click', this.nodeClicked);
+            return node;
         }
-        pageNumberNode.addEventListener('click', function(e) {
+
+        nodeClicked(e) {
             var pageGoto = parseInt(e.path[0].getAttribute('data-number'));
             if (pageGoto > 0) {
                 var evt = document.createEvent("HTMLEvents");
@@ -240,18 +172,50 @@ class rsatPagination extends HTMLElement {
                 e.path[4].dispatchEvent(evt);
                 e.path[4].setAttribute('currentpage', pageGoto);
             }
-        });
-        pageNumberNode.classList = "pagenodes";
-        return pageNumberNode;
-    }
+        }
 
-    addPageDotNode() {
-        var pageNumberNode = document.createElement('div');
-        pageNumberNode.innerHTML = '...';
-        pageNumberNode.classList = "dotnode";
-        return pageNumberNode;
-    }
+        get totalCount() {
+            return this.getAttribute('totalCount')
+        }
 
-}
-window.customElements.define('rsat-pagination', rsatPagination);
+        set totalCount(val) {
+            if (val != null) {
+                this.setAttribute('totalCount', val);
+            }
+        }
+
+        get recordsPerPage() {
+            return this.getAttribute('recordsPerPage')
+        }
+
+        set recordsPerPage(val) {
+            if (val != null) {
+                this.setAttribute('recordsPerPage', val);
+            }
+        }
+
+        get currentPage() {
+            return this.getAttribute('currentPage')
+        }
+
+        set currentPage(val) {
+            if (val != null) {
+                this.setAttribute('currentPage', val);
+            }
+        }
+
+        get theme() {
+            return this.getAttribute('theme')
+        }
+
+        set theme(val) {
+            if (val != null) {
+                this.setAttribute('theme', val);
+            }
+        }
+
+    }
+    window.customElements.define('rsat-pagination', Pagination);
+
+}(window, document));
 </script>
