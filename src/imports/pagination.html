@@ -45,9 +45,6 @@
     <style>
     .node {
         float: left;
-        padding: 10px;
-        float: left;
-        padding: 10px;
         height: 45px;
         width: 45px;
         border-radius: 50%;
@@ -60,13 +57,16 @@
         cursor: pointer;
     }
 
+    .node:disabled {
+        cursor: not-allowed;
+    }
+
     .page-number-node:disabled {
         background: #007bff;
         color: #fff;
-        cursor: not-allowed;
     }
     </style>
-    <h3></h3>
+    <div></div>
 </template>
 
 <script>
@@ -90,7 +90,7 @@
         initShadowDom() {
             const template = thisDocument.querySelector("#popup-template");
             const instance = template.content.cloneNode(true);
-            this.shadowDOM = this.attachShadow({ mode: 'open' });
+            this.shadowDOM = this.attachShadow({ mode: 'closed' });
             this.shadowDOM.appendChild(instance);
         }
 
@@ -107,27 +107,20 @@
             this.totalPages = Math.ceil(this.totalCount / this.recordsPerPage);
             this.currentPageInt = +this.currentPage;
 
-            var pageHtml = "<h3> this has " + this.totalPages + "pages and current page is  " + this.currentPage + " </h3>";
+            var paginationElement = this.shadowDOM.querySelector('div');
+            paginationElement.innerHTML = '';
 
-            var pageHeader = document.createElement("div");
-            pageHeader.classList = "pageHeader";
-
-            var pageNoNode = this.createPreviousNode(Math.max(1, this.currentPageInt - 1));
-            pageHeader.appendChild(pageNoNode);
+            var pageNoNode = this.createPreviousNode(this.currentPageInt);
+            paginationElement.appendChild(pageNoNode);
 
             for (var i = 1; i <= this.totalPages; i++) {
                 var pageNoNode = this.createPageNumberNode(i);
-                pageHeader.appendChild(pageNoNode);
+                paginationElement.appendChild(pageNoNode);
             }
 
-            var pageNoNode = this.createNextNode(Math.min(this.totalPages, this.currentPageInt + 1));
-            pageHeader.appendChild(pageNoNode);
+            var pageNoNode = this.createNextNode(this.currentPageInt, this.totalPages);
+            paginationElement.appendChild(pageNoNode);
 
-            var paginationElement = this.shadowDOM.querySelector('h3');
-            if (paginationElement) {
-                paginationElement.innerHTML = '';
-                paginationElement.append(pageHeader);
-            }
         }
 
         createPageNumberNode(pageNumber) {
@@ -136,12 +129,14 @@
             return pageNumberNode;
         }
 
-        createPreviousNode(pageNumber) {
+        createPreviousNode(currentPageNumber) {
+            var pageNumber = Math.max(1, currentPageNumber - 1);
             var node = this.createNode(pageNumber, "&laquo;");
             return node;
         }
 
-        createNextNode(pageNumber) {
+        createNextNode(currentPageNumber, totalPages) {
+            var pageNumber = Math.min(totalPages, currentPageNumber + 1);
             var node = this.createNode(pageNumber, "&raquo;");
             return node;
         }
@@ -163,14 +158,17 @@
             return node;
         }
 
-        nodeClicked(e) {
-            var pageGoto = parseInt(e.path[0].getAttribute('data-number'));
+        nodeClicked(event) {
+            var pageGoto = parseInt(event.path[0].getAttribute('data-number'));
+
             if (pageGoto > 0) {
-                var evt = document.createEvent("HTMLEvents");
-                evt.initEvent("pageChange", true, true);
-                evt.currentPage = pageGoto;
-                e.path[4].dispatchEvent(evt);
-                e.path[4].setAttribute('currentpage', pageGoto);
+                var pageChangeEvent = document.createEvent("HTMLEvents");
+
+                pageChangeEvent.initEvent("pageChange", true, true);
+                pageChangeEvent.currentPage = pageGoto;
+
+                event.path[3].dispatchEvent(pageChangeEvent);
+                event.path[3].setAttribute('currentpage', pageGoto);
             }
         }
 
