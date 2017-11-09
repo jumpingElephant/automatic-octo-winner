@@ -168,12 +168,12 @@
             }
 
             node.classList = "node";
-            node.addEventListener('click', this.nodeClicked);
+            node.addEventListener('click', this.handleEvent(this, this.nodeClicked));
             return node;
         }
 
         nodeClicked(event) {
-            var pageGoto = parseInt(event.path[0].getAttribute('data-number'));
+            var pageGoto = parseInt(event.currentTarget.getAttribute('data-number'));
 
             if (pageGoto > 0) {
                 var pageChangeEvent = document.createEvent("HTMLEvents");
@@ -181,9 +181,15 @@
                 pageChangeEvent.initEvent("pageChange", true, true);
                 pageChangeEvent.currentPage = pageGoto;
 
-                event.path[3].dispatchEvent(pageChangeEvent);
-                event.path[3].setAttribute('currentPage', pageGoto);
+                this.dispatchEvent(pageChangeEvent);
+                this.setAttribute('currentPage', pageGoto);
             }
+        }
+
+        handleEvent(thisElement, func) {
+            return function(e) {
+                func.apply(thisElement, [e]);
+            };
         }
 
         get totalCount() {
