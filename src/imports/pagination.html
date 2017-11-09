@@ -80,14 +80,11 @@
 
     class Pagination extends HTMLElement {
 
-        static get observedAttributes() { return ['totalcount', 'recordsPerPage', 'currentpage', 'theme'] };
+        static get observedAttributes() { return ['totalcount', 'recordsPerPage', 'currentpage'] };
 
         constructor() {
             super();
-            this.initShadowDom();
-        }
 
-        initShadowDom() {
             const template = thisDocument.querySelector("#popup-template");
             const instance = template.content.cloneNode(true);
             this.shadowDOM = this.attachShadow({ mode: 'closed' });
@@ -95,12 +92,22 @@
         }
 
         attributeChangedCallback(attr, oldvalue, newValue) {
-            if (attr == "currentpage") {
-                if (+newValue > +this.totalPages || +newValue <= 0) {
-                    this.currentPage = 1;
-                }
+            if (this.isCurrentPageValueInvalid(attr, oldvalue, newValue)) {
+                this.currentPage = 1;
             }
             this.setUpUI();
+        }
+
+        isCurrentPageValueInvalid(attr, oldvalue, newValue) {
+            var invalid = false;
+
+            if (attr == "currentpage") {
+                if (+newValue > +this.totalPages || +newValue <= 0) {
+                    invalid = true;
+                }
+            }
+
+            return invalid;
         }
 
         setUpUI() {
@@ -110,7 +117,7 @@
             var paginationElement = this.shadowDOM.querySelector('div');
             paginationElement.innerHTML = '';
 
-            var pageNoNode = this.createPreviousNode(this.currentPageInt);
+            var pageNoNode = this.createPreviousNode();
             paginationElement.appendChild(pageNoNode);
 
             for (var i = 1; i <= this.totalPages; i++) {
@@ -123,31 +130,38 @@
 
         }
 
-        createPageNumberNode(pageNumber) {
-            var pageNumberNode = this.createNode(pageNumber, pageNumber);
-            pageNumberNode.classList += " page-number-node";
-            return pageNumberNode;
-        }
-
-        createPreviousNode(currentPageNumber) {
+        createPreviousNode() {
+            var currentPageNumber = +this.currentPage;
             var pageNumber = Math.max(1, currentPageNumber - 1);
+
             var node = this.createNode(pageNumber, "&laquo;");
             return node;
         }
 
-        createNextNode(currentPageNumber, totalPages) {
+        createPageNumberNode(pageNumber) {
+            var pageNumberNode = this.createNode(pageNumber, pageNumber);
+
+            pageNumberNode.classList += " page-number-node";
+            return pageNumberNode;
+        }
+
+        createNextNode() {
+            var currentPageNumber = +this.currentPage;
+            var totalPages = this.totalPages;
             var pageNumber = Math.min(totalPages, currentPageNumber + 1);
+
             var node = this.createNode(pageNumber, "&raquo;");
             return node;
         }
 
         createNode(pageNumber, label) {
-            var node = document.createElement('button');
+            var currentPageNumber = +this.currentPage;
 
+            var node = document.createElement('button');
             node.innerHTML = label;
             node.setAttribute('data-number', pageNumber);
 
-            if (pageNumber == this.currentPageInt) {
+            if (pageNumber == currentPageNumber) {
                 node.disabled = true;
             } else {
                 node.disabled = false;
@@ -168,17 +182,17 @@
                 pageChangeEvent.currentPage = pageGoto;
 
                 event.path[3].dispatchEvent(pageChangeEvent);
-                event.path[3].setAttribute('currentpage', pageGoto);
+                event.path[3].setAttribute('currentPage', pageGoto);
             }
         }
 
         get totalCount() {
-            return this.getAttribute('totalCount')
+            return this.getAttribute('totalcount')
         }
 
         set totalCount(val) {
             if (val != null) {
-                this.setAttribute('totalCount', val);
+                this.setAttribute('totalcount', val);
             }
         }
 
