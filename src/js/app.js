@@ -2,7 +2,7 @@
 
     document.getElementById("paginationElement").addEventListener("pageChange", function(e) {
         console.log("Page Number " + e.currentPage + " is selected");
-        var spinner=document.getElementsByTagName('pulse-spinner')[0];
+        var spinner = document.getElementsByTagName('pulse-spinner')[0];
         // debugger;
     });
 
